@@ -24,6 +24,12 @@ export class VideoDownloaderService {
       const ytDlp = spawn("yt-dlp", [
         "--dump-json",
         "--no-download",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "--sleep-interval", "1",
+        "-R", "3",
+        "--retry-sleep", "1:5",
+        "--extractor-retries", "3",
+        "--geo-bypass",
         url
       ]);
 
@@ -95,7 +101,10 @@ export class VideoDownloaderService {
     if (!info.formats) return quality === "360p"; // Default fallback
     
     const height = parseInt(quality);
-    return info.formats.some((f: any) => f.height >= height || !f.height);
+    // Only check video formats (vcodec != 'none') with defined height
+    return info.formats.some((f: any) => 
+      f.vcodec && f.vcodec !== 'none' && f.height && f.height >= height
+    );
   }
 
   private formatViews(viewCount: number): string {
@@ -123,19 +132,42 @@ export class VideoDownloaderService {
     }) => void
   ): Promise<string> {
     const outputTemplate = path.join(this.downloadsDir, "%(title)s.%(ext)s");
-    const args = [url, "-o", outputTemplate];
+    const args = [
+      url, 
+      "-o", outputTemplate,
+      // Add robust options for reliability
+      "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "--sleep-interval", "1",
+      "--max-sleep-interval", "5",
+      "-R", "3",
+      "--retry-sleep", "1:5",
+      "--extractor-retries", "3",
+      "--geo-bypass",
+      "-N", "4"
+    ];
 
-    // Set format options
+    // Set format options - using single-file formats since ffmpeg not available
     if (format === "mp3") {
       args.push("-x", "--audio-format", "mp3", "--audio-quality", "0");
     } else if (format === "mp4") {
       if (quality !== "audio") {
-        args.push("-f", `best[height<=${quality.replace('p', '')}][ext=mp4]/best[ext=mp4]`);
+        const height = quality.replace('p', '');
+        // Use single-file MP4 format to avoid merging requirement
+        args.push("-f", `b[ext=mp4][height<=${height}]/b[ext=mp4]/b`);
+      } else {
+        args.push("-f", "ba[ext=m4a]/ba/best");
       }
     } else if (format === "webm") {
       if (quality !== "audio") {
-        args.push("-f", `best[height<=${quality.replace('p', '')}][ext=webm]/best[ext=webm]`);
+        const height = quality.replace('p', '');
+        // Use single-file WebM format to avoid merging requirement
+        args.push("-f", `b[ext=webm][height<=${height}]/b[ext=webm]/b`);
+      } else {
+        args.push("-f", "ba[ext=webm]/ba/best");
       }
+    } else {
+      // Default fallback - just get the best available format
+      args.push("-f", "b/best");
     }
 
     return new Promise((resolve, reject) => {
