@@ -198,6 +198,10 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
+### Error cross-env
+```bash
+npm install -g cross-env
+```
 ## 📝 Notas Adicionales
 
 - La aplicación usa almacenamiento en memoria por defecto

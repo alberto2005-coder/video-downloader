@@ -1,0 +1,50 @@
+# -------------------------
+# Archivos generados por Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# -------------------------
+# Archivos generados por Node.js
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.pnp.*
+.pnpm-debug.log*
+
+# -------------------------
+# Cachés de agente y temporales
+# -------------------------
+agent.cache/
+*.agentstate
+*.lock
+*.tmp
+*.log
+
+# -------------------------
+# IDEs y editores
+# -------------------------
+.vscode/
+.idea/
+
+# -------------------------
+# Otros temporales del sistema
+# -------------------------
+.DS_Store
+Thumbs.db
+*.bak
+*.old
+*.backup
