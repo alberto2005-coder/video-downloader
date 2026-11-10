@@ -48,3 +48,8 @@ Thumbs.db
 *.bak
 *.old
 *.backup
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
